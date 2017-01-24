@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_ParseHttpUrl" Id="{8195615b-f087-4ea1-b07b-c77be3b3a8f0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ParseHttpUrl : BOOL
+VAR_INPUT
+	i_sUrl :T_MaxString;
+END_VAR
+VAR_IN_OUT 
+	io_stConnectionParameters : ST_HTTP_Connection_Parameters;
+END_VAR
+VAR
+	sUrl : T_MaxString;
+	stConnectionParameters : ST_HTTP_Connection_Parameters;
+	nPos: INT;
+	nPosPort: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[sUrl := i_sUrl;
+
+//the shortest form http://a.fi ==> 11 characters
+IF LEN(sUrl) < 11 THEN
+	F_ParseHttpUrl := FALSE;
+	RETURN;
+END_IF
+
+// Parse the protocol
+IF LEFT(sUrl, 5) = 'https' THEN
+	// HTTPS is not supported
+	F_ParseHttpUrl := FALSE;
+	RETURN;
+ELSIF LEFT(sUrl, 4) = 'http' THEN
+	stConnectionParameters.udPort := 80;
+	sUrl := RIGHT(sUrl, LEN(sUrl) - 4);
+ELSE
+	F_ParseHttpUrl := FALSE;
+	RETURN;
+END_IF
+
+//Remove '://'
+IF LEFT(sUrl, 3) = '://' THEN
+	sUrl := RIGHT(sUrl, LEN(sUrl) - 3);
+	// There is only domain + request uri left, minimun 4 characters (a.fi)
+	IF LEN(sUrl) < 4 THEN 
+		F_ParseHttpUrl := FALSE;
+		RETURN;
+	END_IF
+ELSE
+	F_ParseHttpUrl := FALSE;
+	RETURN;
+END_IF
+
+// We have domain [+ port [+ request uri]] left
+nPos := FIND(sUrl, '/');
+nPosPort := FIND(sUrl, ':');
+
+IF nPos = 0 THEN
+	IF nPosPort > 0 THEN
+		stConnectionParameters.sHostName := LEFT(sUrl, nPosPort-1);
+		sUrl := RIGHT(sUrl, LEN(sUrl) - nPosPort);		
+	ELSE
+		stConnectionParameters.sHostName := sUrl;
+	END_IF
+	stConnectionParameters.sRequestURI := '/';
+	io_stConnectionParameters := stConnectionParameters;
+	F_ParseHttpUrl := TRUE;
+ELSE
+	IF nPosPort > 0 THEN
+		stConnectionParameters.sHostName := LEFT(sUrl, nPosPort-1);
+		sUrl := RIGHT(sUrl, LEN(sUrl) - nPosPort);		
+		nPos := FIND(sUrl, '/');
+		stConnectionParameters.udPort := STRING_TO_UDINT(LEFT(sUrl, nPos-1));
+		sUrl := RIGHT(sUrl, LEN(sUrl) - nPos + 1);	
+	ELSE
+		stConnectionParameters.sHostName := LEFT(sUrl, nPos-1);
+		sUrl := RIGHT(sUrl, LEN(sUrl) - nPos+1);
+	END_IF	
+	stConnectionParameters.sRequestURI := sUrl;
+	io_stConnectionParameters := stConnectionParameters;
+	F_ParseHttpUrl := TRUE;
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_ParseHttpUrl">
+      <LineId Id="3" Count="34" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="40" Count="3" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="79" Count="1" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="46" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

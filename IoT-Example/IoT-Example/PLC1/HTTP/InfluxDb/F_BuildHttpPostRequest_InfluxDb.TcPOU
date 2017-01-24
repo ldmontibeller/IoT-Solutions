@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_BuildHttpPostRequest_InfluxDb" Id="{8c88aabe-9e61-4d8b-9e58-f51af5e4e9e0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_BuildHttpPostRequest_InfluxDb : UDINT
+VAR_INPUT
+	i_stHttpConnParams	: ST_HTTP_Connection_Parameters;
+	i_nBytesToSend 		: UDINT;
+END_VAR
+VAR_IN_OUT
+	io_arrInFluxData	: ARRAY[0..HTTP_SEND_DATA_ARRAY_SIZE] OF BYTE;
+	io_arrBytesToSend	: ARRAY[0..HTTP_SEND_DATA_ARRAY_SIZE] OF BYTE;
+END_VAR
+VAR
+	sData				: T_MaxString;
+	i					: INT;
+	nContentLength		: DINT;
+	fbBinaryWriter		: FB_BinaryWriter;
+	sRequestString		: STRING(255);
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+fbBinaryWriter.Init(ADR(io_arrBytesToSend), SIZEOF(io_arrBytesToSend));
+MEMSET(ADR(io_arrBytesToSend), 0, SIZEOF(io_arrBytesToSend));
+
+fbBinaryWriter.WriteString('POST ');
+fbBinaryWriter.WriteString(i_stHttpConnParams.sRequestURI);
+fbBinaryWriter.WriteString(' HTTP/1.1$R$N');
+fbBinaryWriter.WriteString('Host: ');
+fbBinaryWriter.WriteString(i_stHttpConnParams.sHostName);
+fbBinaryWriter.WriteString(' $R$N');
+fbBinaryWriter.WriteString('User-Agent: TwinCAT HttpClient$R$N');
+fbBinaryWriter.WriteString('Content-Type: application/x-www-form-urlencoded$R$N');
+
+// Calculate the length of data
+fbBinaryWriter.WriteString(CONCAT('Content-Length: ', UDINT_TO_STRING(i_nBytesToSend)));
+
+// Http request headers always end to double new line		
+fbBinaryWriter.WriteString('$R$N$R$N');
+// Copy the influx data into http request 
+MEMCPY(ADR(io_arrBytesToSend[fbBinaryWriter.Length]), ADR(io_arrInFluxData), i_nBytesToSend);
+fbBinaryWriter.SetPosition(fbBinaryWriter.Length + i_nBytesToSend);
+// Http request body always ends to new line		
+fbBinaryWriter.WriteString('$R$N');
+
+
+sRequestString := fbBinaryWriter.ToString;
+F_BuildHttpPostRequest_InfluxDb := fbBinaryWriter.Length;
+
+(****** POST Request principle ***********************************************************************
+
+sPostData = 'param1=1&param2=2&param3=3';
+fbBinaryWriter.WriteString('POST /demot/rest-demo/ HTTP/1.1$R$N');
+fbBinaryWriter.WriteString('Host: bafdemo.cloudapp.net $R$N');
+fbBinaryWriter.WriteString('User-Agent: TwinCAT 3.1$R$N');
+fbBinaryWriter.WriteString('Content-Type: application/x-www-form-urlencoded$R$N');
+fbBinaryWriter.WriteString(CONCAT('Content-Length: ', DINT_TO_STRING(LEN(sPostData))));
+fbBinaryWriter.WriteString('$R$N$R$N');
+fbBinaryWriter.WriteString(sPostData);
+fbBinaryWriter.WriteString('$R$N');
+
+******************************************************************************************************)
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_BuildHttpPostRequest_InfluxDb">
+      <LineId Id="3" Count="17" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="22" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

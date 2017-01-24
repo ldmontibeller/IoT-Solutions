@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_MultiConcat6" Id="{07811092-e42c-409e-994c-46ed979c24a8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_MultiConcat6 : STRING(255)
+VAR_INPUT
+	i_str1	: STRING;
+	i_str2	: STRING;
+	i_str3	: STRING;
+	i_str4	: STRING;
+	i_str5	: STRING;
+	i_str6	: STRING;
+END_VAR
+VAR
+	sText:	STRING(255);
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+sText := CONCAT(i_str1, i_str2);
+sText := CONCAT(sText, i_str3);
+sText := CONCAT(sText, i_str4);
+sText := CONCAT(sText, i_str5);
+sText := CONCAT(sText, i_str6);
+
+F_MultiConcat6 := sText;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_MultiConcat6">
+      <LineId Id="3" Count="4" />
+      <LineId Id="14" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

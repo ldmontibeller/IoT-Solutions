@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_MultiConcat12" Id="{b9ef7790-c4ee-4686-9cd1-f8e04ea65554}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_MultiConcat12 : STRING(255)
+VAR_INPUT
+	i_str1	: STRING;
+	i_str2	: STRING;
+	i_str3	: STRING;
+	i_str4	: STRING;
+	i_str5	: STRING;
+	i_str6	: STRING;
+	i_str7	: STRING;
+	i_str8	: STRING;
+	i_str9	: STRING;
+	i_str10	: STRING;
+	i_str11	: STRING;
+	i_str12	: STRING;
+END_VAR
+VAR
+	sText:	STRING(255);
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+sText := CONCAT(i_str1, i_str2);
+sText := CONCAT(sText, i_str3);
+sText := CONCAT(sText, i_str4);
+sText := CONCAT(sText, i_str5);
+sText := CONCAT(sText, i_str6);
+sText := CONCAT(sText, i_str7);
+sText := CONCAT(sText, i_str8);
+sText := CONCAT(sText, i_str9);
+sText := CONCAT(sText, i_str10);
+sText := CONCAT(sText, i_str11);
+sText := CONCAT(sText, i_str12);
+
+F_MultiConcat12 := sText;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_MultiConcat12">
+      <LineId Id="3" Count="14" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

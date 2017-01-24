@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_HTTP_Connection_Parameters" Id="{320a9919-30a9-4eef-80f7-5a1d0ebf95bc}">
+    <Declaration><![CDATA[TYPE ST_HTTP_Connection_Parameters :
+STRUCT
+	bIsValid		: BOOL;
+	sIpv4Address	: STRING;
+	udPort			: UDINT;
+	sHostName		: STRING;
+	sRequestURI 	: STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

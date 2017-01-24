@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="FB_GetHttpConnectionParams" Id="{3ccdec99-57cf-4a75-be13-c92fcaf8c943}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_GetHttpConnectionParams
+VAR_INPUT
+	i_bExecute	: BOOL;
+	i_sHttpUrl	: T_MaxString;
+END_VAR
+VAR_OUTPUT
+	o_bError	: BOOL;
+	o_nErrId	: UDINT;
+	o_bReady	: BOOL;
+	o_stHttpConnectionParams : ST_HTTP_Connection_Parameters;
+END_VAR
+VAR
+	fbGetHostAddrByName		: FB_GetHostAddrByName;
+	stHttpConnectionParams 	: ST_HTTP_Connection_Parameters;
+	execute_R_TRIG			: R_TRIG;
+	getHostAddrBusy_F_TRIG	: F_TRIG;
+	bExecute				: BOOL;
+	bUrlValid: BOOL;
+	nState: INT := 10;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+CASE nState OF
+	
+10: (* init *)
+	nState := 20;
+	
+20:	(* Waiting for start *)
+	
+	IF i_bExecute THEN
+		(* Reset *)
+		o_bReady := FALSE;
+		o_bError := FALSE;
+		o_nErrId := 0;
+		MEMSET(ADR(o_stHttpConnectionParams), 0, SIZEOF(o_stHttpConnectionParams));
+		
+		IF F_ParseHttpUrl(i_sHttpUrl, stHttpConnectionParams) THEN
+			IF stHttpConnectionParams.sHostName <> 'localhost' THEN
+
+				nState := 30;
+			ELSE
+				stHttpConnectionParams.sIpv4Address := '127.0.0.1';	
+				o_stHttpConnectionParams := stHttpConnectionParams;
+				o_bReady := TRUE;
+				nState := 20;			
+			END_IF
+		ELSE 
+			o_bError := TRUE;
+		END_IF
+	END_IF
+
+30:	(* Waiting for ready *)
+
+	fbGetHostAddrByName(
+		sHostName	:= stHttpConnectionParams.sHostName,
+		bExecute 	:= TRUE,
+		tTimeout 	:= T#10S
+	);
+	
+	IF fbGetHostAddrByName.bError THEN
+		fbGetHostAddrByName(bExecute := FALSE);
+		o_bError := TRUE;
+		o_nErrId := fbGetHostAddrByName.nErrID;
+		nState := 100;
+	ELSIF NOT fbGetHostAddrByName.bBusy THEN
+		fbGetHostAddrByName(bExecute := FALSE);
+		stHttpConnectionParams.sIpv4Address := fbGetHostAddrByName.sAddr;
+		o_stHttpConnectionParams := stHttpConnectionParams;
+		o_bReady := TRUE;
+		nState := 20;
+	END_IF
+	
+100: (* Error state*)
+
+	IF NOT i_bExecute THEN
+		nState := 10;
+	END_IF
+
+END_CASE
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_GetHttpConnectionParams">
+      <LineId Id="3" Count="15" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="103" Count="2" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="21" Count="5" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="108" Count="3" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="29" Count="3" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="33" Count="14" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

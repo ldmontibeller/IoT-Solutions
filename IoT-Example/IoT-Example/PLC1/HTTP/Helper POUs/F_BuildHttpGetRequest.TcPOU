@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_BuildHttpGetRequest" Id="{5ac27182-252d-40a6-92c9-8da561730f80}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_BuildHttpGetRequest : UDINT
+VAR_INPUT
+	i_pHttpRequest 		: POINTER TO ST_HTTP_Request;
+	i_stHttpConnParams	: ST_HTTP_Connection_Parameters;
+END_VAR
+VAR_IN_OUT
+	io_arrBytesToSend	: ARRAY[0..HTTP_SEND_DATA_ARRAY_SIZE] OF BYTE;
+END_VAR
+VAR
+	sData				: T_MaxString;
+	i					: INT;
+	nContentLength		: DINT;
+	fbBinaryWriter		: FB_BinaryWriter;
+	sRequestString		: STRING(255);
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+fbBinaryWriter.Init(ADR(io_arrBytesToSend), SIZEOF(io_arrBytesToSend));
+MEMSET(ADR(io_arrBytesToSend), 0, SIZEOF(io_arrBytesToSend));
+
+fbBinaryWriter.WriteString('GET ');
+fbBinaryWriter.WriteString(i_stHttpConnParams.sRequestURI);
+
+// Write the GET request into request uri
+FOR i := 0 TO UDINT_TO_INT(HTTP_PARAMETERS_ARRAY_SIZE) DO 
+	IF LEN(i_pHttpRequest^.arrParameters[i].sName) > 0 THEN
+		IF i = 0 THEN fbBinaryWriter.WriteString('?'); END_IF
+		IF i > 0 THEN fbBinaryWriter.WriteString('&'); END_IF
+		fbBinaryWriter.WriteString(i_pHttpRequest^.arrParameters[i].sName);
+		fbBinaryWriter.WriteString('=');
+		fbBinaryWriter.WriteString(i_pHttpRequest^.arrParameters[i].sValue);
+	END_IF
+END_FOR
+
+fbBinaryWriter.WriteString(' HTTP/1.0$R$N'); // Lets use HTTP 1.0 because responce with "Transfer-Encoding:chunked is much more complex to parse
+fbBinaryWriter.WriteString('Host: ');
+fbBinaryWriter.WriteString(i_stHttpConnParams.sHostName);
+fbBinaryWriter.WriteString(' $R$N');
+fbBinaryWriter.WriteString('User-Agent: TwinCAT HttpClient$R$N');
+
+// Calculate the length of data
+FOR i := 0 TO UDINT_TO_INT(HTTP_PARAMETERS_ARRAY_SIZE) DO 
+	IF LEN(i_pHttpRequest^.arrParameters[i].sName) > 0 THEN
+		IF i > 0 THEN nContentLength := nContentLength + 1; END_IF
+		nContentLength := nContentLength + LEN(i_pHttpRequest^.arrParameters[i].sName) + LEN(i_pHttpRequest^.arrParameters[i].sValue) + 1;
+	END_IF
+END_FOR	
+fbBinaryWriter.WriteString('$R$N$R$N');
+	
+sRequestString := fbBinaryWriter.ToString;
+
+F_BuildHttpGetRequest := fbBinaryWriter.Length;
+
+(****** GET Request principle ***********************************************************************
+
+fbBinaryWriter.WriteString('GET /demot/rest-demo/?'param1=1&param2=2&param3=3' HTTP/1.1$R$N');
+fbBinaryWriter.WriteString('Host: bafdemo.cloudapp.net $R$N');
+fbBinaryWriter.WriteString('User-Agent: TwinCAT 3.1$R$N');
+fbBinaryWriter.WriteString('$R$N$R$N');
+
+***************************************************************************************************)
+
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_BuildHttpGetRequest">
+      <LineId Id="3" Count="3" />
+      <LineId Id="48" Count="28" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="99" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

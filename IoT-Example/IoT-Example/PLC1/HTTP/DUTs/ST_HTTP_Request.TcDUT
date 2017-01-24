@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_HTTP_Request" Id="{f080af0e-c5f1-4c16-85c2-85ff7b56eab6}">
+    <Declaration><![CDATA[TYPE ST_HTTP_Request :
+STRUCT
+	eHttpRequestType	: E_HTTP_Request_Type;
+	arrParameters 		: ARRAY [0..HTTP_PARAMETERS_ARRAY_SIZE] OF ST_HTTP_Parameter;
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

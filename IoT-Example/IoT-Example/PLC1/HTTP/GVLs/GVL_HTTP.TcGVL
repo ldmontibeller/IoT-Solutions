@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <GVL Name="GVL_HTTP" Id="{a48454e9-5d30-44ff-8fe7-aa51545b174c}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	HTTP_SEND_DATA_ARRAY_SIZE 		: UDINT := 49999; 
+	HTTP_RECEIVE_DATA_ARRAY_SIZE 	: UDINT := 9999; 
+	HTTP_PARAMETERS_ARRAY_SIZE		: UDINT := 499;
+	HTTP_RESPONSE_HEADER_ARRAY_SIZE	: UDINT := 20; 
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

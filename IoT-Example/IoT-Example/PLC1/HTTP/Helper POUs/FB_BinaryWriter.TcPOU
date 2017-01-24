@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="FB_BinaryWriter" Id="{05199793-923f-41d0-a5df-80afc16acd51}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_BinaryWriter
+VAR_INPUT
+	i_pDestAddr		: POINTER TO BYTE;
+	i_udDestAddrLen	: UDINT;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	pDestAddr		: POINTER TO BYTE;
+	udDestAddrLen	: UDINT;
+	udCurrentLen 	: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Init" Id="{7b70c4a0-bc02-45ec-acc9-6aef38d5876d}">
+      <Declaration><![CDATA[METHOD Init : BOOL
+VAR_INPUT
+	i_pDestAddr		: POINTER TO BYTE;
+	i_udDestAddrLen	: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[pDestAddr 		:= i_pDestAddr;
+udDestAddrLen 	:=i_udDestAddrLen;
+udCurrentLen 	:= 0;
+
+(* Reset the stream *)
+MEMSET(i_pDestAddr, 0, i_udDestAddrLen);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Length" Id="{d93f15e5-cf65-481e-adfd-9def3caaf26d}">
+      <Declaration><![CDATA[PROPERTY Length : udint]]></Declaration>
+      <Get Name="Get" Id="{6897a79b-99b8-4674-bc87-2805ff29c529}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Length := udCurrentLen;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="SetPosition" Id="{375ac408-063a-4dc6-b721-1f8ce21c313f}">
+      <Declaration><![CDATA[METHOD SetPosition : BOOL
+VAR_INPUT
+	i_udPosition : UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF i_udPosition <= udDestAddrLen THEN
+	udCurrentLen := i_udPosition;
+	SetPosition := TRUE;
+ELSE
+	SetPosition := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ToString" Id="{31300ce4-28a7-4508-8ffc-4122ce15a004}">
+      <Declaration><![CDATA[PROPERTY ToString : STRING(255)]]></Declaration>
+      <Get Name="Get" Id="{fecd32fc-c098-43dd-b879-42cab6e6e18c}">
+        <Declaration><![CDATA[VAR
+	s255String : STRING(255);
+	length : UDINT;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[s255String := '';
+length := MIN(udCurrentLen, DINT_TO_UDINT(SIZEOF(s255String)));
+MEMCPY(ADR(s255String), pDestAddr, length);
+ToString := s255String;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="WriteString" Id="{5e836436-21c6-4b75-92df-fe9cac9f7590}">
+      <Declaration><![CDATA[METHOD WriteString : BOOL
+VAR_INPUT
+	i_sStringToAppend : T_MaxString;
+END_VAR
+VAR
+	udStringLen: UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+udStringLen := DINT_TO_UDINT(LEN(i_sStringToAppend));
+
+(* Only write if there's memory free for writing *)
+IF udCurrentLen + udStringLen < udDestAddrLen THEN
+	MEMCPY(pDestAddr + udCurrentLen, ADR(i_sStringToAppend), udStringLen);
+	udCurrentLen := udCurrentLen + udStringLen;
+	WriteString := TRUE;
+ELSE
+	WriteString := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_BinaryWriter">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BinaryWriter.Init">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BinaryWriter.Length.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BinaryWriter.SetPosition">
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BinaryWriter.ToString.Get">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BinaryWriter.WriteString">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,10 @@
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\bin\Release\AdsMqtt.exe.config
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\bin\Release\AdsMqtt.exe
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\bin\Release\AdsMqtt.pdb
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\bin\Release\M2Mqtt.Net.dll
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\obj\Release\AdsMqtt.csprojResolveAssemblyReference.cache
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\obj\Release\AdsMqtt.Form1.resources
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\obj\Release\AdsMqtt.Properties.Resources.resources
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\obj\Release\AdsMqtt.csproj.GenerateResource.Cache
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\obj\Release\AdsMqtt.exe
+C:\Users\AapoV\Documents\02 - Asiakkaat\HAMK\IoT-Example\AdsMqtt\obj\Release\AdsMqtt.pdb

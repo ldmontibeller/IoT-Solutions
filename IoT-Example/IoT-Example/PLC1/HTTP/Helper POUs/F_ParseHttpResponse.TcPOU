@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_ParseHttpResponse" Id="{9eb89929-ecc8-46d2-8770-6f41999723bc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ParseHttpResponse : ST_HTTP_Response
+VAR_INPUT
+	i_udNumOfBytes 	: UDINT;
+END_VAR
+VAR_IN_OUT
+	io_arrReceivedBytes	: ARRAY[0..HTTP_RECEIVE_DATA_ARRAY_SIZE] OF BYTE;
+END_VAR
+VAR
+	i				: UDINT;
+	headerIndex		: UDINT;
+	stHttpResp 		: ST_HTTP_Response;
+	pReceivedBytes	: POINTER TO BYTE;
+	udNumOfBytes	: UDINT;
+	udBytesToCopy	: UDINT;
+	start: UDINT;
+	arrDummyArray	: ARRAY [0..HTTP_RECEIVE_DATA_ARRAY_SIZE] OF BYTE;
+	length: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF i_udNumOfBytes < 20 THEN
+	RETURN;
+END_IF
+
+headerIndex 	:= 0;
+udNumOfBytes := MIN(i_udNumOfBytes, HTTP_RECEIVE_DATA_ARRAY_SIZE);
+
+FOR i := 0 TO udNumOfBytes - 3 DO
+	
+	IF io_arrReceivedBytes[i] = 13 AND io_arrReceivedBytes[i+1] = 10 AND io_arrReceivedBytes[i+2] = 13 AND io_arrReceivedBytes[i+3] = 10 THEN
+		
+		// We've found the double linefeed ($R$N$R$N) ==> the rest of messafe is the actual content we are interested
+		
+		length := i - start;
+		MEMCPY(ADR(arrDummyArray), ADR(io_arrReceivedBytes[start]), length);
+		arrDummyArray[length] := 0;
+		MEMCPY(ADR(stHttpResp.arrHeaders[headerIndex]), ADR(arrDummyArray), length + 1);
+		
+		udBytesToCopy := MIN(udNumOfBytes - i + 3, SIZEOF(stHttpResp.sContent));
+		MEMCPY(ADR(stHttpResp.sContent), ADR(io_arrReceivedBytes[i+4]), udBytesToCopy);
+		
+		EXIT;
+		
+	ELSIF io_arrReceivedBytes[i] = 13 AND io_arrReceivedBytes[i+1] = 10 THEN
+		
+		// We've found a single linefeed ($R$N) ==> a single response header ends here
+		
+		length := i - start;
+		MEMCPY(ADR(arrDummyArray), ADR(io_arrReceivedBytes[start]), length);
+		arrDummyArray[length] := 0;
+		MEMCPY(ADR(stHttpResp.arrHeaders[headerIndex]), ADR(arrDummyArray), length + 1);
+		start := i + 2;
+		headerIndex := headerIndex + 1;
+		
+		IF headerIndex > HTTP_RESPONSE_HEADER_ARRAY_SIZE THEN
+			EXIT;
+		END_IF
+		
+	END_IF
+END_FOR
+F_ParseHttpResponse := stHttpResp;]]></ST>
+    </Implementation>
+    <LineIds Name="F_ParseHttpResponse">
+      <LineId Id="3" Count="40" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
